@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Server {
+  id    Int    @id @default(autoincrement())
+  token String @unique @default(uuid())
+  name  String
+
+  // Data Loss Notification
+  dataLossAlertEnabled       Boolean @map("data_loss_alert_enabled")
+  missedDataThreshold        Int     @map("missed_data_threshold")
+  additionalPingCheckEnabled Boolean @map("additional_ping_check_enabled")
+
+  // Resource Usage Notification
+  resourceUsageAlertEnabled Boolean @map("resource_usage_alert_enabled")
+  systemLoadThreshold       Int     @map("system_load_threshold")
+  ramUsageThreshold         Int     @map("ram_usage_threshold")
+  diskUsageThreshold        Int     @map("disk_usage_threshold")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  Metric    Metric[]
+
+  @@map("servers")
+}
+
+model Metric {
+  id Int @id @default(autoincrement())
+
+  // Belongs to Server
+  server   Server @relation(fields: [serverId], references: [id])
+  serverId Int    @map("server_id")
+
+  // Agent Metadata
+  version String
+
+  // OS
+  uptime           Int
+  sessions         Int
+  processes        Int
+  processesArray   String @map("processes_array")
+  fileHandles      Int    @map("file_handles")
+  fileHandlesLimit Int    @map("file_handles_limit")
+  osKernel         String @map("os_kernel")
+  osName           String @map("os_name")
+  osArch           String @map("os_arch")
+
+  // Hardware
+  cpuName   String @map("cpu_name")
+  cpuCores  Int    @map("cpu_cores")
+  cpuFreq   Float  @map("cpu_freq")
+  ramTotal  Int    @map("ram_total")
+  ramUsage  Int    @map("ram_usage")
+  swapTotal Int    @map("swap_total")
+  swapUsage Int    @map("swap_usage")
+  diskArray String @map("disk_array")
+  diskTotal Int    @map("disk_total")
+  diskUsage Int    @map("disk_usage")
+  load      String
+  loadCPU   Float  @map("load_cpu")
+  loadIO    Float  @map("load_io")
+
+  // Network
+  connections Int
+  nic         String
+  ipv4        String
+  ipv6        String
+  rx          Int
+  tx          Int
+  rxGap       Int    @map("rx_gap")
+  txGap       Int    @map("tx_gap")
+  pingEU      Float  @map("ping_eu")
+  pingUS      Float  @map("ping_us")
+  pingAS      Float  @map("ping_as")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("metrics")
+}
