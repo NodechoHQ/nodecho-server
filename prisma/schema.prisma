@@ -48,40 +48,40 @@ model Metric {
   version String
 
   // OS
-  uptime           Int
-  sessions         Int
-  processes        Int
+  uptime           BigInt
+  sessions         String
+  processes        String
   processesArray   String @map("processes_array")
-  fileHandles      Int    @map("file_handles")
-  fileHandlesLimit Int    @map("file_handles_limit")
+  fileHandles      String @map("file_handles")
+  fileHandlesLimit String @map("file_handles_limit")
   osKernel         String @map("os_kernel")
   osName           String @map("os_name")
   osArch           String @map("os_arch")
 
   // Hardware
   cpuName   String @map("cpu_name")
-  cpuCores  Int    @map("cpu_cores")
-  cpuFreq   Float  @map("cpu_freq")
-  ramTotal  Int    @map("ram_total")
-  ramUsage  Int    @map("ram_usage")
-  swapTotal Int    @map("swap_total")
-  swapUsage Int    @map("swap_usage")
+  cpuCores  String @map("cpu_cores")
+  cpuFreq   String @map("cpu_freq")
+  ramTotal  BigInt @map("ram_total")
+  ramUsage  BigInt @map("ram_usage")
+  swapTotal BigInt @map("swap_total")
+  swapUsage BigInt @map("swap_usage")
   diskArray String @map("disk_array")
-  diskTotal Int    @map("disk_total")
-  diskUsage Int    @map("disk_usage")
+  diskTotal BigInt @map("disk_total")
+  diskUsage BigInt @map("disk_usage")
   load      String
-  loadCPU   Float  @map("load_cpu")
-  loadIO    Float  @map("load_io")
+  loadCPU   String @map("load_cpu")
+  loadIO    String @map("load_io")
 
   // Network
-  connections Int
+  connections BigInt
   nic         String
   ipv4        String
   ipv6        String
-  rx          Int
-  tx          Int
-  rxGap       Int    @map("rx_gap")
-  txGap       Int    @map("tx_gap")
+  rx          BigInt
+  tx          BigInt
+  rxGap       BigInt @map("rx_gap")
+  txGap       BigInt @map("tx_gap")
   pingEU      Float  @map("ping_eu")
   pingUS      Float  @map("ping_us")
   pingAS      Float  @map("ping_as")

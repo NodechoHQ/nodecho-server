@@ -33,6 +33,12 @@ export class ServersService {
     });
   }
 
+  async findByToken(token: string): Promise<Server | null> {
+    return this.prisma.server.findUnique({
+      where: { token: token },
+    });
+  }
+
   async update(id: number, updateServerDto: UpdateServerDto): Promise<Server> {
     return this.prisma.server.update({
       data: {

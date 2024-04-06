@@ -2,5 +2,8 @@
     "cSpell.words": [
         "Nodecho",
         "NestJS"
-    ]
+    ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    }
 }
