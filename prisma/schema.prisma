@@ -13,10 +13,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                   Int       @id @default(autoincrement())
+  name                 String
+  email                String    @unique
+  emailVerifiedAt      DateTime? @map("email_verified_at")
+  lastVerifyingEmailAt DateTime? @map("last_verifying_email_at")
+  passwordHash         String    @map("password_hash")
+  servers              Server[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
 model Server {
   id    Int    @id @default(autoincrement())
   token String @unique @default(uuid())
   name  String
+
+  owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId Int  @default(1) @map("owner_id") // TODO: Remove default value
 
   // Data Loss Notification
   dataLossAlertEnabled       Boolean @map("data_loss_alert_enabled")
@@ -41,7 +59,7 @@ model Metric {
   id Int @id @default(autoincrement())
 
   // Belongs to Server
-  server   Server @relation(fields: [serverId], references: [id])
+  server   Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
   serverId Int    @map("server_id")
 
   // Agent Metadata
