@@ -8,6 +8,8 @@ import { MetricsModule } from './metrics/metrics.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { EnvSchema } from './env.schema';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -19,6 +21,9 @@ import { EnvSchema } from './env.schema';
     ConfigModule.forRoot({
       isGlobal: true,
       validate: (env) => EnvSchema.parse(env),
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'client'),
     }),
   ],
   controllers: [AppController],
