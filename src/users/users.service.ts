@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
 import { users } from 'src/database/schema';
 import {
   DatabaseProvider,
@@ -17,7 +16,7 @@ export class UsersService {
 
   async findOne(email: string): Promise<UserDto | null> {
     const user = await this.db.query.users.findFirst({
-      where: eq(users.email, email),
+      where: (users, { eq }) => eq(users.email, email),
       columns: { passwordHash: false },
     });
     return user ?? null;
@@ -34,7 +33,7 @@ export class UsersService {
       .returning({ id: users.id });
     const newUserId = newUserIds[0].id;
     const newUser = await this.db.query.users.findFirst({
-      where: eq(users.id, newUserId),
+      where: (users, { eq }) => eq(users.id, newUserId),
       columns: { passwordHash: false },
     });
     if (!newUser) {
@@ -48,7 +47,7 @@ export class UsersService {
     password: string,
   ): Promise<UserDto | null> {
     const user = await this.db.query.users.findFirst({
-      where: eq(users.email, email),
+      where: (users, { eq }) => eq(users.email, email),
     });
     if (!user) {
       return null;

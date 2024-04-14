@@ -5,7 +5,6 @@ import {
   kDatabaseProvider,
 } from 'src/database/database.provider';
 import { metrics } from 'src/database/schema';
-import { desc, eq } from 'drizzle-orm';
 
 type CreateMetricParams = {
   serverId: number;
@@ -68,10 +67,10 @@ export class MetricsService {
     offset?: number;
   }): Promise<(typeof metrics.$inferSelect)[]> {
     return this.db.query.metrics.findMany({
-      where: eq(metrics.serverId, params.serverId),
+      where: (metrics, { eq }) => eq(metrics.serverId, params.serverId),
       limit: params.limit ?? 20,
       offset: params.offset ?? 0,
-      orderBy: desc(metrics.createdAt),
+      orderBy: (metrics, { desc }) => desc(metrics.createdAt),
     });
   }
 }
