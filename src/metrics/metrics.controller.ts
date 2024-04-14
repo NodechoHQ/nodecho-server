@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Body,
   Controller,
-  DefaultValuePipe,
   Get,
   ParseIntPipe,
   Post,
@@ -42,8 +41,8 @@ export class MetricsController {
   @Get()
   async findAll(
     @Query('serverId', ParseIntPipe) serverId: number,
-    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
-    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
   ) {
     return this.metricsService.findAll({ serverId, limit, offset });
   }

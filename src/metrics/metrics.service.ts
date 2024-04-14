@@ -64,13 +64,13 @@ export class MetricsService {
 
   async findAll(params: {
     serverId: number;
-    limit: number;
-    offset: number;
+    limit?: number;
+    offset?: number;
   }): Promise<(typeof metrics.$inferSelect)[]> {
     return this.db.query.metrics.findMany({
       where: eq(metrics.serverId, params.serverId),
-      limit: params.limit,
-      offset: params.offset,
+      limit: params.limit ?? 20,
+      offset: params.offset ?? 0,
       orderBy: desc(metrics.createdAt),
     });
   }

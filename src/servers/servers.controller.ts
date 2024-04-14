@@ -10,6 +10,8 @@ import {
   UseGuards,
   Req,
   UnauthorizedException,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ServersService } from './servers.service';
 import { CreateServerDto } from './dto/create-server.dto';
@@ -33,33 +35,40 @@ export class ServersController {
   }
 
   @Get()
-  async findAll() {
-    return this.serversService.findAll();
+  async findAll(
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+  ) {
+    return this.serversService.findAll({ limit, offset });
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.serversService.findOne(+id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const server = await this.serversService.findOne(id);
+    if (!server) {
+      throw new NotFoundException();
+    }
+    return server;
   }
 
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateServerDto: UpdateServerDto,
   ) {
-    const server = await this.serversService.findOne(+id);
+    const server = await this.serversService.findOne(id);
     if (!server) {
       throw new NotFoundException();
     }
-    return this.serversService.update(+id, updateServerDto);
+    return this.serversService.update(id, updateServerDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    const server = await this.serversService.findOne(+id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    const server = await this.serversService.findOne(id);
     if (!server) {
       throw new NotFoundException();
     }
-    return this.serversService.remove(+id);
+    return this.serversService.remove(id);
   }
 }

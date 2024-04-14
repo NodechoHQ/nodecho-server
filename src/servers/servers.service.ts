@@ -6,7 +6,7 @@ import {
   kDatabaseProvider,
 } from 'src/database/database.provider';
 import { servers } from 'src/database/schema';
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 
 type ServerDto = typeof servers.$inferSelect;
 
@@ -37,8 +37,15 @@ export class ServersService {
     return newServers[0];
   }
 
-  async findAll(): Promise<ServerDto[]> {
-    return this.db.query.servers.findMany();
+  async findAll(params: {
+    limit?: number;
+    offset?: number;
+  }): Promise<ServerDto[]> {
+    return this.db.query.servers.findMany({
+      limit: params.limit ?? 20,
+      offset: params.offset ?? 0,
+      orderBy: desc(servers.createdAt),
+    });
   }
 
   async findOne(id: number): Promise<ServerDto | null> {
