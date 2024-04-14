@@ -1,6 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/database/prisma.service';
+import { Inject, Injectable } from '@nestjs/common';
 import { MetricData } from './dto/create-metric.dto';
+import {
+  DatabaseProvider,
+  kDatabaseProvider,
+} from 'src/database/database.provider';
+import { metrics } from 'src/database/schema';
 
 type CreateMetricParams = {
   serverId: number;
@@ -9,11 +13,14 @@ type CreateMetricParams = {
 
 @Injectable()
 export class MetricsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(kDatabaseProvider) private readonly db: DatabaseProvider,
+  ) {}
 
   async create({ serverId, data }: CreateMetricParams): Promise<number> {
-    const metric = await this.prisma.metric.create({
-      data: {
+    const newMetrics = await this.db
+      .insert(metrics)
+      .values({
         serverId: serverId,
         version: data.version,
         uptime: data.uptime,
@@ -49,9 +56,8 @@ export class MetricsService {
         pingEU: data.ping_eu,
         pingUS: data.ping_us,
         pingAS: data.ping_as,
-      },
-    });
-
-    return metric.id;
+      })
+      .returning();
+    return newMetrics[0].id;
   }
 }

@@ -1,22 +1,63 @@
-import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { PrismaService } from 'src/database/prisma.service';
+import { Inject, Injectable } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
+import { users } from 'src/database/schema';
+import {
+  DatabaseProvider,
+  kDatabaseProvider,
+} from 'src/database/database.provider';
+import * as bcrypt from 'bcrypt';
+
+type UserDto = Omit<typeof users.$inferSelect, 'passwordHash'>;
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(kDatabaseProvider) private readonly db: DatabaseProvider,
+  ) {}
 
-  async findOne(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { email } });
+  async findOne(email: string): Promise<UserDto | null> {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.email, email),
+      columns: { passwordHash: false },
+    });
+    return user ?? null;
   }
 
   async create(data: {
     name: string;
     email: string;
     passwordHash: string;
-  }): Promise<Omit<User, 'passwordHash'>> {
-    const { passwordHash, ...user } = await this.prisma.user.create({ data });
-    passwordHash;
-    return user;
+  }): Promise<UserDto> {
+    const newUserIds: { id: number }[] = await this.db
+      .insert(users)
+      .values(data)
+      .returning({ id: users.id });
+    const newUserId = newUserIds[0].id;
+    const newUser = await this.db.query.users.findFirst({
+      where: eq(users.id, newUserId),
+      columns: { passwordHash: false },
+    });
+    if (!newUser) {
+      throw new Error('Failed to create user');
+    }
+    return newUser;
+  }
+
+  async validatePassword(
+    email: string,
+    password: string,
+  ): Promise<UserDto | null> {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+    if (!user) {
+      return null;
+    }
+    const isValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isValid) {
+      return null;
+    }
+    const sanitizedUser = { ...user, passwordHash: undefined };
+    return sanitizedUser;
   }
 }
