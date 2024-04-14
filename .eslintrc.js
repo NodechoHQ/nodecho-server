@@ -5,9 +5,13 @@ module.exports = {
     tsconfigRootDir: __dirname,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint/eslint-plugin'],
+  plugins: [
+    '@typescript-eslint/eslint-plugin', 
+    'drizzle',
+  ],
   extends: [
     'plugin:@typescript-eslint/recommended',
+    'plugin:drizzle/recommended',
     'plugin:prettier/recommended',
   ],
   root: true,
