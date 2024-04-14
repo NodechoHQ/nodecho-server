@@ -5,6 +5,7 @@ import {
   kDatabaseProvider,
 } from 'src/database/database.provider';
 import { metrics } from 'src/database/schema';
+import { desc, eq } from 'drizzle-orm';
 
 type CreateMetricParams = {
   serverId: number;
@@ -59,5 +60,18 @@ export class MetricsService {
       })
       .returning();
     return newMetrics[0].id;
+  }
+
+  async findAll(params: {
+    serverId: number;
+    limit: number;
+    offset: number;
+  }): Promise<(typeof metrics.$inferSelect)[]> {
+    return this.db.query.metrics.findMany({
+      where: eq(metrics.serverId, params.serverId),
+      limit: params.limit,
+      offset: params.offset,
+      orderBy: desc(metrics.createdAt),
+    });
   }
 }

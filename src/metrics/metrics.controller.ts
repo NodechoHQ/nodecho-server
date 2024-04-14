@@ -1,4 +1,13 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { CreateMetricDto, MetricData } from './dto/create-metric.dto';
 import { MetricsService } from './metrics.service';
 import { ServersService } from 'src/servers/servers.service';
@@ -28,5 +37,14 @@ export class MetricsController {
     });
 
     return { id: metricId };
+  }
+
+  @Get()
+  async findAll(
+    @Query('serverId', ParseIntPipe) serverId: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
+  ) {
+    return this.metricsService.findAll({ serverId, limit, offset });
   }
 }
