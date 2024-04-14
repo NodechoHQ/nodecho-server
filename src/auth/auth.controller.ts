@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -23,7 +24,7 @@ export class AuthController {
   @Post('register')
   async register(@Body() registerUserDto: RegisterUserDto) {
     const { name, email, password } = registerUserDto;
-    const matchedUser = await this.usersService.findOne(email);
+    const matchedUser = await this.usersService.findOne({ email });
     if (matchedUser) {
       throw new BadRequestException('Email already exists');
     }
@@ -39,7 +40,23 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req: any) {
-    return req.user;
+  async getProfile(@Request() req: any) {
+    console.log('req.user', req.user);
+    const user = await this.usersService.findOne({ id: req.user.id });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    return user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('send-verify-email')
+  async sendVerifyEmail(@Request() req: any) {
+    return this.authService.sendVerifyEmail({ userId: req.user.id });
+  }
+
+  @Get('verify')
+  async verifyEmail(@Query('token') token: string) {
+    return this.authService.verifyToken(token);
   }
 }

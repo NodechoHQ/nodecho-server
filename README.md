@@ -38,6 +38,9 @@ $ pnpm install
 # development
 $ pnpm run start
 
+# filling env variables
+$ cp .env.template .env
+
 # watch mode
 $ pnpm run start:dev
 

@@ -5,8 +5,10 @@ import {
   kDatabaseProvider,
 } from 'src/database/database.provider';
 import * as bcrypt from 'bcrypt';
+import { eq } from 'drizzle-orm';
 
 type UserDto = Omit<typeof users.$inferSelect, 'passwordHash'>;
+type FindUserParams = { email: string } | { id: number };
 
 @Injectable()
 export class UsersService {
@@ -14,9 +16,15 @@ export class UsersService {
     @Inject(kDatabaseProvider) private readonly db: DatabaseProvider,
   ) {}
 
-  async findOne(email: string): Promise<UserDto | null> {
+  async findOne(params: FindUserParams): Promise<UserDto | null> {
     const user = await this.db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.email, email),
+      where: (users, { eq }) => {
+        if ('id' in params) {
+          return eq(users.id, params.id);
+        } else {
+          return eq(users.email, params.email);
+        }
+      },
       columns: { passwordHash: false },
     });
     return user ?? null;
@@ -58,5 +66,19 @@ export class UsersService {
     }
     const sanitizedUser = { ...user, passwordHash: undefined };
     return sanitizedUser;
+  }
+
+  async updateLastVerifyingEmailAt(email: string): Promise<void> {
+    await this.db
+      .update(users)
+      .set({ lastVerifyingEmailAt: new Date() })
+      .where(eq(users.email, email));
+  }
+
+  async markEmailVerified(email: string): Promise<void> {
+    await this.db
+      .update(users)
+      .set({ emailVerifiedAt: new Date() })
+      .where(eq(users.email, email));
   }
 }
