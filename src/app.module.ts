@@ -11,6 +11,8 @@ import { Env, EnvSchema } from './env.schema';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -45,6 +47,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
 })
 export class AppModule {}

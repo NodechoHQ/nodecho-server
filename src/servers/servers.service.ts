@@ -10,6 +10,8 @@ import { eq } from 'drizzle-orm';
 
 type ServerDto = typeof servers.$inferSelect;
 
+type FindOneParams = { id: number } | { token: string };
+
 @Injectable()
 export class ServersService {
   constructor(
@@ -38,26 +40,27 @@ export class ServersService {
   }
 
   async findAll(params: {
+    userId: number;
     limit?: number;
     offset?: number;
   }): Promise<ServerDto[]> {
     return this.db.query.servers.findMany({
+      where: (servers, { eq }) => eq(servers.ownerId, params.userId),
       limit: params.limit ?? 20,
       offset: params.offset ?? 0,
       orderBy: (servers, { desc }) => desc(servers.createdAt),
     });
   }
 
-  async findOne(id: number): Promise<ServerDto | null> {
+  async findOne(params: FindOneParams): Promise<ServerDto | null> {
     const server = await this.db.query.servers.findFirst({
-      where: (servers, { eq }) => eq(servers.id, id),
-    });
-    return server ?? null;
-  }
-
-  async findByToken(token: string): Promise<ServerDto | null> {
-    const server = await this.db.query.servers.findFirst({
-      where: (servers, { eq }) => eq(servers.token, token),
+      where: (servers, { eq }) => {
+        if ('id' in params) {
+          return eq(servers.id, params.id);
+        } else {
+          return eq(servers.token, params.token);
+        }
+      },
     });
     return server ?? null;
   }

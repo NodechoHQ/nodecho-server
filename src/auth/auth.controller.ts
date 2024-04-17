@@ -7,14 +7,14 @@ import {
   HttpStatus,
   Post,
   Query,
-  Request,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './local-auth.guard';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
 import { UsersService } from 'src/users/users.service';
 import { RegisterUserDto } from './dto/register-user.dto';
+import { Public } from './public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -23,6 +23,7 @@ export class AuthController {
     private readonly usersService: UsersService,
   ) {}
 
+  @Public()
   @Post('register')
   async register(@Body() registerUserDto: RegisterUserDto) {
     const { name, email, password } = registerUserDto;
@@ -34,17 +35,16 @@ export class AuthController {
     return this.usersService.create({ name, email, passwordHash });
   }
 
+  @Public()
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Request() req: any) {
+  async login(@Req() req: any) {
     return this.authService.login(req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@Request() req: any) {
-    console.log('req.user', req.user);
+  async getProfile(@Req() req: any) {
     const user = await this.usersService.findOne({ id: req.user.id });
     if (!user) {
       throw new BadRequestException('User not found');
@@ -52,12 +52,13 @@ export class AuthController {
     return user;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('send-verify-email')
-  async sendVerifyEmail(@Request() req: any) {
+  async sendVerifyEmail(@Req() req: any) {
     return this.authService.sendVerifyEmail({ userId: req.user.id });
   }
 
+  @Public()
   @Get('verify')
   async verifyEmail(@Query('token') token: string) {
     return this.authService.verifyToken(token);

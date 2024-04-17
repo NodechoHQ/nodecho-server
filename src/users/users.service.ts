@@ -81,4 +81,17 @@ export class UsersService {
       .set({ emailVerifiedAt: new Date() })
       .where(eq(users.email, email));
   }
+
+  async isOwner(userId: number, serverId: number): Promise<boolean> {
+    const user = await this.db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.id, userId),
+      with: {
+        servers: { where: (servers, { eq }) => eq(servers.id, serverId) },
+      },
+    });
+    if (!user) {
+      return false;
+    }
+    return user.servers.length > 0;
+  }
 }
